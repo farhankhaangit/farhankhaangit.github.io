@@ -263,8 +263,8 @@
 
     const months = [getMonthString(-1), getMonthString(0), getMonthString(1)];
 
-    const loadData = () => JSON.parse(localStorage.getItem("tuitionData_123") || JSON.stringify(defaultData));
-    const saveData = (data) => localStorage.setItem("tuitionData_123", JSON.stringify(data));
+    const loadData = () => JSON.parse(localStorage.getItem("tuitionData") || JSON.stringify(defaultData));
+    const saveData = (data) => localStorage.setItem("tuitionData", JSON.stringify(data));
 
     const showNotification = (message,error = false) => {
       const note = document.getElementById("notification");
@@ -452,7 +452,6 @@
       }
     };
 
-    
     const downloadJson = () => {
       const jsonStr = JSON.stringify(loadData(), null, 2);
       const blob = new Blob([jsonStr], { type: "application/json" });
@@ -509,8 +508,32 @@
       });
     }
 
+    const sha256 = async (message) => {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return hashHex;
+    }
+
+    const startApplication = async () => {   // make function async
+      // hide everything
+      document.querySelectorAll('*').forEach(el => el.style.opacity = 0);
+      const password = '354e64ee46e955e64047e20fafa8c90826612069964f4d5d2c6a0098ec23e818';
+      const userPass = prompt('Enter password:');
+      const userHash = await sha256(userPass);
+      if (userHash === password) {
+        document.querySelectorAll('*').forEach(el => el.style.opacity = 1);
+        refreshUI();
+      } else {
+        alert('Incorrect password!');
+        window.location.href = '/';
+      }
+    };
+
+
     document.getElementById("historyMonthSelect").addEventListener("change", refreshHistoryTable);
-    window.onload = refreshUI;
+    window.onload = startApplication;
   </script>
 </body>
 </html>
