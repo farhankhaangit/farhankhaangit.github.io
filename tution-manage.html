@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tuition Manager</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f5f7fa;
+      padding: 10px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 100%;
+      width: 100%;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+      color: #555;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    button:hover {
+      background: #2980b9;
+      transform: scale(1.02);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow-x: auto;
+    }
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 7px;
+      text-align: center;
+    }
+    th {
+      background: #2c3e50;
+      color: white;
+    }
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: none;
+      animation: fadeinout 2s;
+      z-index: 1000;
+    }
+    .notification.success {
+      background: #27ae60;
+    }
+    .notification.error {
+      background: #e74c3c;
+    }
+    @keyframes fadeinout {
+      0% { opacity: 0; transform: translate(-50%, 10px); }
+      10% { opacity: 1; transform: translate(-50%, 0); }
+      90% { opacity: 1; transform: translate(-50%, 0); }
+      100% { opacity: 0; transform: translate(-50%, -10px); }
+    }
+    @media (max-width: 768px) {
+      .card {
+        padding: 15px;
+      }
+      input, select, button {
+        font-size: 14px;
+        padding: 10px;
+      }
+      table, th, td {
+        font-size: 14px;
+      }
+    }
+    .action-buttons{
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    .action-buttons button{
+        font-size: 11px !important;
+        padding: 5px !important;
+    }
+    .action-buttons button:first-child{
+        background: #3498db !important;
+    }
+    .action-buttons button:last-child{
+        background: #e74c3c !important;
+    }
+  </style>
+</head>
+<body style="max-width: 1000px;margin: auto;">
+  <h1>Tuition Manager</h1>
+  <div class="container">
+    <div class="card">
+      <h2>Add/Edit Student</h2>
+      <input type="hidden" id="editingId" />
+      <label>Name:</label>
+      <input type="text" id="studentName" />
+      <label>Class:</label>
+      <input type="text" id="studentClass" />
+      <label>Fee:</label>
+      <input type="number" id="studentFee" />
+      <label>Fee Submission Date</label>
+      <select id="feeSubmissionDate">
+        <option value="" selected disabled>Select</option>
+        <option value="01">01</option>
+        <option value="02">02</option>
+        <option value="03">03</option>
+        <option value="04">04</option>
+        <option value="05">05</option>
+        <option value="06">06</option>
+        <option value="07">07</option>
+        <option value="08">08</option>
+        <option value="09">09</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+        <option value="17">17</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+        <option value="20">20</option>
+        <option value="21">21</option>
+        <option value="22">22</option>
+        <option value="23">23</option>
+        <option value="24">24</option>
+        <option value="25">25</option>
+        <option value="26">26</option>
+        <option value="27">27</option>
+        <option value="28">28</option>
+        <option value="29">29</option>
+        <option value="30">30</option>
+        <option value="31">31</option>
+      </select>
+      <button onclick="addOrEditStudent()">Add/Edit Student</button>
+    </div>
+
+    <div class="card">
+      <h2>Record Fee Submission</h2>
+      <label>Student:</label>
+      <select id="feeStudentSelect"></select>
+      <label>Month:</label>
+      <select id="feeMonth"></select>
+      <button onclick="recordFee()">Record Fee</button>
+    </div>
+
+    <div class="card">
+      <h2>Students List</h2>
+      <table id="studentTable">
+        <thead>
+          <tr>
+            <th>Name</th><th>Class</th><th>Fee</th><th>Fee Date</th><th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Current Month Fee Status</h2>
+      <table id="currentMonthTable">
+        <thead>
+          <tr>
+            <th>Name</th><th>Class</th><th>Paid</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p style="margin: 20px 0 5px 0;">Total Received: <strong id="currentMonthTotal" style="float: right;">0</strong></p>
+      <p style="margin: 0 ;">Total Remaining: <strong id="currentMonthRemaining" style="float: right;">0</strong></p>
+    </div>
+
+    <div class="card">
+      <h2>Fee History by Month</h2>
+      <label>Select Month:</label>
+      <select id="historyMonthSelect" style="margin-bottom: 10px;"></select>
+      <table id="historyTable">
+        <thead>
+          <tr>
+            <th>Name</th><th>Class</th><th>Month</th><th>Paid Amount</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="notification" class="notification"></div>
+
+  <script>
+    const defaultData = {
+      students: [],
+      fee_submissions: []
+    };
+
+    const getMonthString = (offset = 0) => {
+      const d = new Date();
+      d.setMonth(d.getMonth() + offset);
+      return d.toLocaleString('default', { month: 'long' }).toLowerCase() + d.getFullYear().toString().slice(-2);
+    };
+
+    const months = [getMonthString(-1), getMonthString(0), getMonthString(1)];
+
+    const loadData = () => JSON.parse(localStorage.getItem("tuitionData") || JSON.stringify(defaultData));
+    const saveData = (data) => localStorage.setItem("tuitionData", JSON.stringify(data));
+
+    const showNotification = (message,error = false) => {
+      const note = document.getElementById("notification");
+      if(error){
+        note.classList.add("error");
+        note.classList.remove("success");
+      } else{
+        note.classList.add("success");
+        note.classList.remove("error");
+      }
+      note.innerText = message;
+      note.style.display = "block";
+      setTimeout(() => note.style.display = "none", 2000);
+    };
+
+    const getAllUniqueMonths = () => {
+      const data = loadData();
+      const monthSet = new Set();
+      data.fee_submissions.forEach(f => monthSet.add(f.month));
+      return Array.from(monthSet).sort((a, b) => {
+        const parse = m => new Date(m.replace(/[^a-z]/g, '') + ' 1, 20' + m.replace(/[^0-9]/g, ''));
+        return parse(b) - parse(a);
+      });
+    };
+
+    const refreshHistoryTable = () => {
+      const data = loadData();
+      const historyMonthSelect = document.getElementById("historyMonthSelect");
+      const feeTable = document.querySelector("#historyTable tbody");
+      const selectedHistoryMonth = historyMonthSelect.value;
+      feeTable.innerHTML = "";
+      let totalReceived = 0;
+      data.fee_submissions.filter(f => f.month === selectedHistoryMonth).forEach(f => {
+        const student = data.students.find(s => s.id === f.student_id);
+        const name = student ? student.name : 'Unknown';
+        const fee = f.fee;
+        const sclass = student ? student.class : 'N/A';
+        feeTable.innerHTML += `<tr><td>${name}</td><td>${sclass}</td><td>${f.month}</td><td>${fee}</td></tr>`;
+        
+        totalReceived += fee;
+      });
+      feeTable.innerHTML += `<tr><td colspan="3" style="font-weight:bold;">Total Received</td><td style="font-weight:bold;">${totalReceived}</td></tr>`;
+    };
+
+    const refreshUI = () => {
+      const data = loadData();
+
+      const studentTable = document.querySelector("#studentTable tbody");
+      const studentSelect = document.getElementById("feeStudentSelect");
+      const feeMonthSelect = document.getElementById("feeMonth");
+      const historyMonthSelect = document.getElementById("historyMonthSelect");
+      const currentMonthTable = document.querySelector("#currentMonthTable tbody");
+
+      studentTable.innerHTML = "";
+      studentSelect.innerHTML = "";
+      feeMonthSelect.innerHTML = "";
+      historyMonthSelect.innerHTML = "";
+      currentMonthTable.innerHTML = "";
+
+      months.forEach(m => feeMonthSelect.innerHTML += `<option value="${m}">${m}</option>`);
+
+      const allMonths = getAllUniqueMonths();
+      allMonths.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        historyMonthSelect.appendChild(opt);
+      });
+
+      const defaultMonth = getMonthString(-1);
+      if ([...historyMonthSelect.options].some(opt => opt.value === defaultMonth)) {
+        historyMonthSelect.value = defaultMonth;
+      } else if (historyMonthSelect.options.length > 0) {
+        historyMonthSelect.value = historyMonthSelect.options[0].value;
+      }
+
+      const currentMonth = getMonthString(0);
+      let totalReceived = 0;
+      let totalRemaining = 0;
+
+      data.students.forEach(s => {
+        // if (s.status === "active") {
+          studentTable.innerHTML += `<tr><td>${s.name}</td><td>${s.class}</td><td>${s.fee}</td><td>${s.fee_date}</td><td style="color:${s.status === "active" ? 'green' : 'red'};font-weight:bold">${s.status}</td>
+            <td class="action-buttons"><button onclick="editStudent(${s.id})">Edit</button> <button onclick="inactivateStudent(${s.id})">${s.status === "active"?'Delete':'Activate'}</button></td></tr>`;
+        // }
+        studentSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.class})</option>`;
+
+        if (s.status === "active") {
+          const paid = data.fee_submissions.find(f => f.student_id === s.id && f.month === currentMonth);
+          if (paid) {
+            totalReceived += s.fee;
+          } else {
+            totalRemaining += s.fee;
+          }
+          currentMonthTable.innerHTML += `<tr><td>${s.name}</td><td>${s.class}</td><td style="color:${paid ? 'green' : 'red'};font-weight:bold">${paid ? "Yes" : "No"}</td></tr>`;
+        }
+      });
+      document.getElementById("currentMonthTotal").innerText = totalReceived;
+      document.getElementById("currentMonthRemaining").innerText = totalRemaining;
+
+      refreshHistoryTable();
+    };
+
+    const addOrEditStudent = () => {
+        const name = document.getElementById("studentName").value.trim();
+        const cls = document.getElementById("studentClass").value.trim();
+        const fee = parseFloat(document.getElementById("studentFee").value);
+        const feeSubmissionDate = document.getElementById("feeSubmissionDate").value;
+        const editingId = document.getElementById("editingId").value;
+
+        if (!name || !cls || isNaN(fee)) return showNotification("Please fill all student fields correctly.", true);
+
+        const data = loadData();
+
+        if (editingId) {
+            // Edit existing student
+            const student = data.students.find(s => s.id === parseInt(editingId));
+            if (!student) return showNotification("Student not found for editing.", true);
+
+            student.name = name;
+            student.class = cls;
+            student.fee = fee;
+            student.fee_date = feeSubmissionDate;
+
+            showNotification("Student updated successfully");
+        } else {
+            // Add new student
+            const id = data.students.length ? data.students[data.students.length - 1].id + 1 : 1;
+            data.students.push({ id, name, class: cls, fee, status: 'active', fee_date: feeSubmissionDate });
+            showNotification("Student added successfully");
+        }
+
+        saveData(data);
+        refreshUI();
+
+        // Clear the form
+        document.getElementById("studentName").value = "";
+        document.getElementById("studentClass").value = "";
+        document.getElementById("studentFee").value = "";
+        document.getElementById("editingId").value = "";
+        document.getElementById("feeSubmissionDate").value = "";
+    };
+
+
+    const recordFee = () => {
+      const studentId = parseInt(document.getElementById("feeStudentSelect").value);
+      const month = document.getElementById("feeMonth").value;
+      if (!studentId || !month) return showNotification("Please select student and month.",true);
+
+      const data = loadData();
+      const existingSubmission = data.fee_submissions.find(f => f.student_id === studentId && f.month === month);
+      if (existingSubmission) return showNotification("Fee already recorded for this month.",true);
+
+      const student = data.students.find(s => s.id === studentId);
+      if (!student) return showNotification("Student not found.",true);
+
+      data.fee_submissions.push({ student_id: studentId, month, fee: student.fee });
+      saveData(data);
+      refreshUI();
+      showNotification("Fee recorded successfully");
+    };
+
+    const editStudent = (id) => {
+        const data = loadData();
+        const student = data.students.find(s => s.id === id);
+        if (student) {
+            document.getElementById("studentName").value = student.name;
+            document.getElementById("studentClass").value = student.class;
+            document.getElementById("studentFee").value = student.fee;
+            document.getElementById("feeSubmissionDate").value = student.fee_date;
+            document.getElementById("editingId").value = student.id;
+            // Scroll to top where form is
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    };
+
+    const inactivateStudent = (id) => {
+      const data = loadData();
+      const student = data.students.find(s => s.id === id);
+      if (student) {
+        student.status = student.status === "active" ? "inactive" : "active";
+        saveData(data);
+        refreshUI();
+        showNotification("Student has been " + (student.status === "active" ? "activated" : "deleted") + " successfully");
+      }
+    };
+
+    document.getElementById("historyMonthSelect").addEventListener("change", refreshHistoryTable);
+
+    window.onload = refreshUI;
+  </script>
+</body>
+</html>
