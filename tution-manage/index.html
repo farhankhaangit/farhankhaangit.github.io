@@ -122,10 +122,33 @@
     .action-buttons button:last-child{
         background: #e74c3c !important;
     }
+    .export-import{
+      display: flex;
+      width: 300px;
+      margin: 0px auto 20px auto;
+      justify-content: center;
+    }
+    .export-import button{
+      width: 100px !important;
+      font-size: 12px !important;
+      padding: 5px !important;
+      font-weight: normal !important;
+      margin: 0px 5px !important;
+    }
+    .export-import button:first-child{
+      background-color: #27ae60 !important;
+    }
+    .export-import button:last-child{
+      background-color: #555 !important;
+    }
   </style>
 </head>
 <body style="max-width: 1000px;margin: auto;">
   <h1>Tuition Manager</h1>
+  <div class="export-import">
+    <button onclick="downloadJson()">Export Data</button>
+    <button onclick="importData()">Import Data</button>
+  </div>
   <div class="container">
     <div class="card">
       <h2>Add/Edit Student</h2>
@@ -240,8 +263,8 @@
 
     const months = [getMonthString(-1), getMonthString(0), getMonthString(1)];
 
-    const loadData = () => JSON.parse(localStorage.getItem("tuitionData") || JSON.stringify(defaultData));
-    const saveData = (data) => localStorage.setItem("tuitionData", JSON.stringify(data));
+    const loadData = () => JSON.parse(localStorage.getItem("tuitionData_123") || JSON.stringify(defaultData));
+    const saveData = (data) => localStorage.setItem("tuitionData_123", JSON.stringify(data));
 
     const showNotification = (message,error = false) => {
       const note = document.getElementById("notification");
@@ -429,8 +452,64 @@
       }
     };
 
-    document.getElementById("historyMonthSelect").addEventListener("change", refreshHistoryTable);
+    
+    const downloadJson = () => {
+      const jsonStr = JSON.stringify(loadData(), null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "tution-data.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
 
+    const importJson = () => {
+      return new Promise((resolve, reject) => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".json";
+
+        input.onchange = () => {
+          const file = input.files[0];
+          if (!file) {
+            input.remove();
+            return reject("No file selected");
+          }
+
+          const reader = new FileReader();
+          reader.onload = event => {
+            try {
+              const parsed = JSON.parse(event.target.result);
+              resolve(parsed);
+            } catch (error) {
+              reject("Invalid JSON content");
+            }
+            input.remove(); // Remove input after processing
+          };
+
+          reader.readAsText(file);
+        };
+
+        // Programmatically open file selector
+        input.click();
+      });
+    }
+
+    const importData = () => {
+      importJson().then(data => {
+        saveData(data);
+        alert("Data imported successfully");
+        refreshUI();
+      }).catch(err => {
+        alert('Error importing data: '.err);
+      });
+    }
+
+    document.getElementById("historyMonthSelect").addEventListener("change", refreshHistoryTable);
     window.onload = refreshUI;
   </script>
 </body>
