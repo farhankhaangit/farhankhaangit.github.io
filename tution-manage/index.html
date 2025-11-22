@@ -142,8 +142,38 @@
       background-color: #555 !important;
     }
   </style>
+  <style>
+    /* HTML: <div class="loader"></div> */
+    .loader {
+      width: 15px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      animation: l5 1s infinite linear alternate;
+    }
+    @keyframes l5 {
+        0%  {box-shadow: 20px 0 #000, -20px 0 #0002;background: #000 }
+        33% {box-shadow: 20px 0 #000, -20px 0 #0002;background: #0002}
+        66% {box-shadow: 20px 0 #0002,-20px 0 #000; background: #0002}
+        100%{box-shadow: 20px 0 #0002,-20px 0 #000; background: #000 }
+    }
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.358);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+  </style>
 </head>
 <body style="max-width: 1000px;margin: auto;">
+  <div class="loader-container" style="display: none;" id="loader">
+    <div class="loader"></div>
+  </div>
   <h1>Tuition Manager</h1>
   <div class="export-import">
     <button onclick="downloadJson()">Export Data</button>
@@ -208,14 +238,16 @@
 
     <div class="card">
       <h2>Students List</h2>
-      <table id="studentTable">
-        <thead>
-          <tr>
-            <th>Name</th><th>Class</th><th>Fee</th><th>Fee Date</th><th>Status</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div style="overflow-x:auto;">
+        <table id="studentTable">
+          <thead>
+            <tr>
+              <th>Name</th><th>Class</th><th>Fee</th><th>Fee Date</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
 
     <div class="card">
@@ -261,10 +293,47 @@
       return d.toLocaleString('default', { month: 'long' }).toLowerCase() + d.getFullYear().toString().slice(-2);
     };
 
-    const months = [getMonthString(-1), getMonthString(0), getMonthString(1)];
+    function showLoader(){
+      document.getElementById("loader").style.display = "flex";
+    }
+    function hideLoader(){
+      document.getElementById("loader").style.display = "none";
+    }
 
-    const loadData = () => JSON.parse(localStorage.getItem("tuitionData_123") || JSON.stringify(defaultData));
-    const saveData = (data) => localStorage.setItem("tuitionData_123", JSON.stringify(data));
+    const months = [getMonthString(-1), getMonthString(0), getMonthString(1)];
+    const apiUrl = 'https://api.jsonbin.io/v3/b/691d7d37ae596e708f626e73';
+    const headers = {
+      'X-Master-Key': '$2a$10$bsWJac6pLgVj/oyVfZzUfexOtGb8AuRhM/fzoJc/7ERv3tqIwJBA.',
+      'X-Access-Key': '$2a$10$.B7r5mrYhNW5NFLk3c9w1eTEo17xbHlbwtIk8c53knXdZyZJ9S88S'
+    }
+    let tutionData = null;
+
+    const loadData = async () => {
+      if(!tutionData){
+        showLoader();
+        const response = await fetch(apiUrl, { headers });
+        hideLoader();
+        const json = await response.json();
+        tutionData = json.record;
+      }
+      return tutionData;
+    }
+    const saveData = async (data) => {
+      tutionData = data;
+      showLoader();
+      const response = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      hideLoader();
+      if(response.status !== 200){
+        showNotification("Error saving data to server", true);
+      }
+    }
 
     const showNotification = (message,error = false) => {
       const note = document.getElementById("notification");
@@ -281,7 +350,7 @@
     };
 
     const getAllUniqueMonths = () => {
-      const data = loadData();
+      const data = tutionData;
       const monthSet = new Set();
       data.fee_submissions.forEach(f => monthSet.add(f.month));
       return Array.from(monthSet).sort((a, b) => {
@@ -291,7 +360,7 @@
     };
 
     const refreshHistoryTable = () => {
-      const data = loadData();
+      const data = tutionData;
       const historyMonthSelect = document.getElementById("historyMonthSelect");
       const feeTable = document.querySelector("#historyTable tbody");
       const selectedHistoryMonth = historyMonthSelect.value;
@@ -309,8 +378,8 @@
       feeTable.innerHTML += `<tr><td colspan="3" style="font-weight:bold;">Total Received</td><td style="font-weight:bold;">${totalReceived}</td></tr>`;
     };
 
-    const refreshUI = () => {
-      const data = loadData();
+    const refreshUI = async () => {
+      const data = await loadData();
 
       const studentTable = document.querySelector("#studentTable tbody");
       const studentSelect = document.getElementById("feeStudentSelect");
@@ -377,7 +446,7 @@
 
         if (!name || !cls || isNaN(fee)) return showNotification("Please fill all student fields correctly.", true);
 
-        const data = loadData();
+        const data = tutionData;
 
         if (editingId) {
             // Edit existing student
@@ -408,13 +477,12 @@
         document.getElementById("feeSubmissionDate").value = "";
     };
 
-
     const recordFee = () => {
       const studentId = parseInt(document.getElementById("feeStudentSelect").value);
       const month = document.getElementById("feeMonth").value;
       if (!studentId || !month) return showNotification("Please select student and month.",true);
 
-      const data = loadData();
+      const data = tutionData;
       const existingSubmission = data.fee_submissions.find(f => f.student_id === studentId && f.month === month);
       if (existingSubmission) return showNotification("Fee already recorded for this month.",true);
 
@@ -428,7 +496,7 @@
     };
 
     const editStudent = (id) => {
-        const data = loadData();
+        const data = tutionData;
         const student = data.students.find(s => s.id === id);
         if (student) {
             document.getElementById("studentName").value = student.name;
@@ -442,7 +510,7 @@
     };
 
     const inactivateStudent = (id) => {
-      const data = loadData();
+      const data = tutionData;
       const student = data.students.find(s => s.id === id);
       if (student) {
         student.status = student.status === "active" ? "inactive" : "active";
@@ -453,7 +521,7 @@
     };
 
     const downloadJson = () => {
-      const jsonStr = JSON.stringify(loadData(), null, 2);
+      const jsonStr = JSON.stringify(tutionData, null, 2);
       const blob = new Blob([jsonStr], { type: "application/json" });
       
       const url = URL.createObjectURL(blob);
