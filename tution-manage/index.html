@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tuition Manager</title>
+  <title>Tution Manager</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -263,8 +263,8 @@
 
     const months = [getMonthString(-1), getMonthString(0), getMonthString(1)];
 
-    const loadData = () => JSON.parse(localStorage.getItem("tuitionData") || JSON.stringify(defaultData));
-    const saveData = (data) => localStorage.setItem("tuitionData", JSON.stringify(data));
+    const loadData = () => JSON.parse(localStorage.getItem("tuitionData_123") || JSON.stringify(defaultData));
+    const saveData = (data) => localStorage.setItem("tuitionData_123", JSON.stringify(data));
 
     const showNotification = (message,error = false) => {
       const note = document.getElementById("notification");
