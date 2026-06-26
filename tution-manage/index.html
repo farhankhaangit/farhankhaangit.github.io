@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tution Manager</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -28,6 +29,7 @@
       border-radius: 16px;
       padding: 20px;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+      height: 100%;
     }
     label {
       display: block;
@@ -116,11 +118,14 @@
         font-size: 11px !important;
         padding: 5px !important;
     }
-    .action-buttons button:first-child{
+    .action-buttons button.edit{
         background: #3498db !important;
     }
-    .action-buttons button:last-child{
+    .action-buttons button.delete{
         background: #e74c3c !important;
+    }
+    .action-buttons button.activate{
+        background: #27ae60 !important;
     }
     .export-import{
       display: flex;
@@ -180,102 +185,110 @@
     <button onclick="importData()">Import Data</button>
   </div>
   <div class="container">
-    <div class="card">
-      <h2>Add/Edit Student</h2>
-      <input type="hidden" id="editingId" />
-      <label>Name:</label>
-      <input type="text" id="studentName" />
-      <label>Class:</label>
-      <input type="text" id="studentClass" />
-      <label>Fee:</label>
-      <input type="number" id="studentFee" />
-      <label>Fee Submission Date</label>
-      <select id="feeSubmissionDate">
-        <option value="" selected disabled>Select</option>
-        <option value="01">01</option>
-        <option value="02">02</option>
-        <option value="03">03</option>
-        <option value="04">04</option>
-        <option value="05">05</option>
-        <option value="06">06</option>
-        <option value="07">07</option>
-        <option value="08">08</option>
-        <option value="09">09</option>
-        <option value="10">10</option>
-        <option value="11">11</option>
-        <option value="12">12</option>
-        <option value="13">13</option>
-        <option value="14">14</option>
-        <option value="15">15</option>
-        <option value="16">16</option>
-        <option value="17">17</option>
-        <option value="18">18</option>
-        <option value="19">19</option>
-        <option value="20">20</option>
-        <option value="21">21</option>
-        <option value="22">22</option>
-        <option value="23">23</option>
-        <option value="24">24</option>
-        <option value="25">25</option>
-        <option value="26">26</option>
-        <option value="27">27</option>
-        <option value="28">28</option>
-        <option value="29">29</option>
-        <option value="30">30</option>
-        <option value="31">31</option>
-      </select>
-      <button onclick="addOrEditStudent()">Add/Edit Student</button>
-    </div>
-
-    <div class="card">
-      <h2>Record Fee Submission</h2>
-      <label>Student:</label>
-      <select id="feeStudentSelect"></select>
-      <label>Month:</label>
-      <select id="feeMonth"></select>
-      <button onclick="recordFee()">Record Fee</button>
-    </div>
-
-    <div class="card">
-      <h2>Students List</h2>
-      <div style="overflow-x:auto;">
-        <table id="studentTable">
-          <thead>
-            <tr>
-              <th>Name</th><th>Class</th><th>Fee</th><th>Fee Date</th><th>Status</th><th>Actions</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+    <div class="row">
+      <div class="col-12 col-lg-6 mt-4">
+        <div class="card">
+          <h2>Add/Edit Student</h2>
+          <input type="hidden" id="editingId" />
+          <label>Name:</label>
+          <input type="text" id="studentName" />
+          <label>Class:</label>
+          <input type="text" id="studentClass" />
+          <label>Fee:</label>
+          <input type="number" id="studentFee" />
+          <label>Fee Submission Date</label>
+          <select id="feeSubmissionDate">
+            <option value="" selected disabled>Select</option>
+            <option value="01">01</option>
+            <option value="02">02</option>
+            <option value="03">03</option>
+            <option value="04">04</option>
+            <option value="05">05</option>
+            <option value="06">06</option>
+            <option value="07">07</option>
+            <option value="08">08</option>
+            <option value="09">09</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="17">17</option>
+            <option value="18">18</option>
+            <option value="19">19</option>
+            <option value="20">20</option>
+            <option value="21">21</option>
+            <option value="22">22</option>
+            <option value="23">23</option>
+            <option value="24">24</option>
+            <option value="25">25</option>
+            <option value="26">26</option>
+            <option value="27">27</option>
+            <option value="28">28</option>
+            <option value="29">29</option>
+            <option value="30">30</option>
+            <option value="31">31</option>
+          </select>
+          <button onclick="addOrEditStudent()">Add/Edit Student</button>
+        </div>
       </div>
-    </div>
-
-    <div class="card">
-      <h2>Current Month Fee Status</h2>
-      <table id="currentMonthTable">
-        <thead>
-          <tr>
-            <th>Name</th><th>Class</th><th>Paid</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <p style="margin: 20px 0 5px 0;">Total Received: <strong id="currentMonthTotal" style="float: right;">0</strong></p>
-      <p style="margin: 0 ;">Total Remaining: <strong id="currentMonthRemaining" style="float: right;">0</strong></p>
-    </div>
-
-    <div class="card">
-      <h2>Fee History by Month</h2>
-      <label>Select Month:</label>
-      <select id="historyMonthSelect" style="margin-bottom: 10px;"></select>
-      <table id="historyTable">
-        <thead>
-          <tr>
-            <th>Name</th><th>Class</th><th>Month</th><th>Paid Amount</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="col-12 col-lg-6 mt-4">
+        <div class="card">
+          <h2>Record Fee Submission</h2>
+          <label>Student:</label>
+          <select id="feeStudentSelect"></select>
+          <label>Month:</label>
+          <select id="feeMonth"></select>
+          <button onclick="recordFee()">Record Fee</button>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6 mt-4">
+        <div class="card">
+          <h2>Current Month Fee Status</h2>
+          <table id="currentMonthTable">
+            <thead>
+              <tr>
+                <th>Name</th><th>Fee Date</th><th>Paid</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <p style="margin: 20px 0 5px 0;">Total Received: <strong id="currentMonthTotal" style="float: right;">0</strong></p>
+          <p style="margin: 0 ;">Total Remaining: <strong id="currentMonthRemaining" style="float: right;">0</strong></p>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6 mt-4">
+        <div class="card">
+          <h2>Fee History by Month</h2>
+          <label>Select Month:</label>
+          <select id="historyMonthSelect" style="margin-bottom: 10px;"></select>
+          <table id="historyTable">
+            <thead>
+              <tr>
+                <th>Name</th><th>Month</th><th>Paid Amount</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col-12 mt-4">
+        <div class="card">
+          <h2>Students List</h2>
+          <div style="overflow:auto;max-height: 500px;">
+            <table id="studentTable">
+              <thead>
+                <tr>
+                  <th>Name</th><th>Class</th><th>Fee</th><th>Fee Date</th><th>Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -371,11 +384,11 @@
         const name = student ? student.name : 'Unknown';
         const fee = f.fee;
         const sclass = student ? student.class : 'N/A';
-        feeTable.innerHTML += `<tr><td>${name}</td><td>${sclass}</td><td>${f.month}</td><td>${fee}</td></tr>`;
+        feeTable.innerHTML += `<tr><td>${name}</td><td>${f.month}</td><td>${fee}</td></tr>`;
         
         totalReceived += fee;
       });
-      feeTable.innerHTML += `<tr><td colspan="3" style="font-weight:bold;">Total Received</td><td style="font-weight:bold;">${totalReceived}</td></tr>`;
+      feeTable.innerHTML += `<tr><td colspan="2" style="font-weight:bold;">Total Received</td><td style="font-weight:bold;">${totalReceived}</td></tr>`;
     };
 
     const refreshUI = async () => {
@@ -417,7 +430,7 @@
       data.students.forEach(s => {
         // if (s.status === "active") {
           studentTable.innerHTML += `<tr><td>${s.name}</td><td>${s.class}</td><td>${s.fee}</td><td>${s.fee_date}</td><td style="color:${s.status === "active" ? 'green' : 'red'};font-weight:bold">${s.status}</td>
-            <td class="action-buttons"><button onclick="editStudent(${s.id})">Edit</button> <button onclick="inactivateStudent(${s.id})">${s.status === "active"?'Delete':'Activate'}</button></td></tr>`;
+            <td class="action-buttons"><button onclick="editStudent(${s.id})" class="edit">Edit</button> <button onclick="inactivateStudent(${s.id})" class="${s.status === "active"?'delete':'activate'}">${s.status === "active"?'Delete':'Activate'}</button></td></tr>`;
         // }
         studentSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.class})</option>`;
 
@@ -428,7 +441,7 @@
           } else {
             totalRemaining += s.fee;
           }
-          currentMonthTable.innerHTML += `<tr><td>${s.name}</td><td>${s.class}</td><td style="color:${paid ? 'green' : 'red'};font-weight:bold">${paid ? "Yes" : "No"}</td></tr>`;
+          currentMonthTable.innerHTML += `<tr><td>${s.name}</td><td>${s.fee_date}</td><td style="color:${paid ? 'green' : 'red'};font-weight:bold">${paid ? "Yes" : "No"}</td></tr>`;
         }
       });
       document.getElementById("currentMonthTotal").innerText = totalReceived;
